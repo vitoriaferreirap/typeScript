@@ -1,8 +1,19 @@
+/*
 enum Role {
     Admin, // 0
     Editor,
     Guest,
 }
+    */
 
-let userRoles: Role =  Role.Admin;
-console.log(userRoles); // Deve imprimir 0, pois Role.Admin = 0
+let userRoles: Role =  'Admin';
+
+//tipos de união
+type Role = 'Admin' | 'Editor' | 'Guest';
+type User = {
+    name: string;
+    age: number;
+    role: Role;
+    permissioins: string[];
+};
+console.log(userRoles); 
