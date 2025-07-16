@@ -48,3 +48,15 @@ let user2: {
         description: ['admin']
     }
 }
+
+//definindo um obj com qualquar valor
+let user3: {} = 'recebe valor qualquer';
+
+//tipo de obj flexível
+//Record-defini um objeto com chaves do tipo string e valores que podem ser number ou string
+let data: Record<string, number | string>;
+data = {
+    name: 'Max',
+    age: 30,
+    code: 1234
+};
