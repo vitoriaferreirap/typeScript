@@ -63,7 +63,7 @@ class Employee extends Person {
     
 }
 
-//classes abstratas (atua como classe base, deve ser estendida)
+//classes abstratas (atua como classe base, deve ser estendida por outras classes)
 abstract class UIElement {
     constructor(public id: string) { }
     clone(targetLocation: string) {
