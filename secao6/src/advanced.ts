@@ -1,6 +1,6 @@
 //trabalhando com classe mais avançada
 class Person{
-    constructor(private firstName: string, private lastName: string) {}
+    constructor(protected firstName: string, private lastName: string) {}
 
     //métodos para obter - listar
 
@@ -47,3 +47,18 @@ console.log(max._fullName); // Max Doe
 max._lastName = "Smith";
 console.log(max._lastName); // Smith
 console.log(max._fullName); 
+
+
+
+//herança 
+class Employee extends Person {
+    constructor(firstName: string, lastName: string, public jobTitle: string) {
+        super(firstName, lastName); //chama o construtor da classe pai Person
+    }
+//metodos personalizados        
+    work() { 
+        console.log(this._firstName);
+    }
+
+    
+}
