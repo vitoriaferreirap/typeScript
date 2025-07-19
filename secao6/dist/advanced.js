@@ -40,4 +40,11 @@ class Employee extends Person {
         console.log(this._firstName);
     }
 }
+class UIElement {
+    constructor(id) {
+        this.id = id;
+    }
+    clone(targetLocation) {
+    }
+}
 //# sourceMappingURL=advanced.js.map
