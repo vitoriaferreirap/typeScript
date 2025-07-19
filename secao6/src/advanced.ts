@@ -62,3 +62,12 @@ class Employee extends Person {
 
     
 }
+
+//classes abstratas (atua como classe base, deve ser estendida)
+abstract class UIElement {
+    constructor(public id: string) { }
+    clone(targetLocation: string) {
+        //logic to duplicate the element
+        
+    }
+}
