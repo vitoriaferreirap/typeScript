@@ -40,3 +40,21 @@ if (button) {
 }
 
 console.log(add(5));
+
+
+//arrays
+const hobbies = ['Cozinhar', 'Esportes'];
+const activeHobbies = ['Correr', 'Natação', ...hobbies];
+
+activeHobbies.push(...hobbies); //... é o spread operator, que espalha os elementos do array
+
+console.log(activeHobbies);
+//obj
+const person = {
+    name: 'João',
+    age: 30
+};  
+const copiedPerson = { ...person }; //copia o objeto, espalha as propriedades do objeto
+
+console.log(copiedPerson);
+

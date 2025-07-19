@@ -9,4 +9,14 @@ if (button) {
     button.addEventListener('click', event => console.log(event));
 }
 console.log(add(5));
+const hobbies = ['Cozinhar', 'Esportes'];
+const activeHobbies = ['Correr', 'Natação', ...hobbies];
+activeHobbies.push(...hobbies);
+console.log(activeHobbies);
+const person = {
+    name: 'João',
+    age: 30
+};
+const copiedPerson = Object.assign({}, person);
+console.log(copiedPerson);
 //# sourceMappingURL=app.js.map
