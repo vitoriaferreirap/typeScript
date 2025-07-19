@@ -1,5 +1,5 @@
 //usando ES6 -
-
+/*
 //const vs let
 const userName = 'João';
 let age = 30;
@@ -7,7 +7,7 @@ let age = 30;
 
 //userName = 'Maria'; Erro: não é possível reatribuir uma constante
 age = 29;
-/*
+
 //var
 function add(a: number, b: number) {
     var result
@@ -51,10 +51,26 @@ activeHobbies.push(...hobbies); //... é o spread operator, que espalha os eleme
 console.log(activeHobbies);
 //obj
 const person = {
-    name: 'João',
+    firstName: 'João',
     age: 30
 };  
 const copiedPerson = { ...person }; //copia o objeto, espalha as propriedades do objeto
 
 console.log(copiedPerson);
 
+const adicionar = (...numbers: number[]) => { // usa o spread para espalhar um array do tipo
+    return numbers.reduce((acc, curr) => { //acc = acumulador, curr = valor atual (reduce é uma função que reduz um array a um único valor)
+        return acc + curr;
+    }, 0);
+};
+
+const addedNumbers = adicionar(5, 10, 2, 3.7);
+console.log(addedNumbers); // 20.7
+
+//desconstrução de arrays
+const [hobby1, hobby2, ...remainingHobbies] = hobbies; //desestruturação de arrays
+console.log(hobbies, hobby1, hobby2); 
+
+//desconstrução de objetos
+const { firstName: userName2, age } = person; //desestrutura
+console.log(userName2, age, person);
