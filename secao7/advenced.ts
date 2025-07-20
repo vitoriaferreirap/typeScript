@@ -11,3 +11,5 @@ store.isActive = true;
 //store.name = "Teste"; Erro: 'name' não é do tipo number ou boolean
 
 
+
+
