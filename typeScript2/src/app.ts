@@ -1,3 +1,40 @@
+//Validation usando interfaces
+//A interface Validatable define as regras de validação que podem ser aplicadas a diferentes tipos de dados.
+//Ela pode ser usada para validar strings, números ou outros tipos de dados que atendam aos critérios especificados.
+interface Validatable { 
+    value: string | number; //pode ser string ou number
+    required?: boolean; 
+    minLength?: number; 
+    maxLength?: number; 
+    min?: number; 
+    max?: number; 
+}
+//fuction de validação que usará a interface Validatable para validar os dados de entrada.
+function validate(validatableInput: Validatable) {
+    let isValid = true; //variável para armazenar o resultado da validação
+
+    if (validatableInput.required) {
+        isValid = isValid && validatableInput.value.toString().trim().length !== 0; //verifica se o valor é obrigatório e não está vazio
+    }
+    if (validatableInput.minLength != null && typeof validatableInput.value === 'string') {
+        isValid = isValid && validatableInput.value.length >= validatableInput.minLength; //verifica se o valor atende ao comprimento mínimo
+    }
+    if (validatableInput.maxLength != null && typeof validatableInput.value === 'string') {
+        isValid = isValid && validatableInput.value.length <= validatableInput.maxLength; //verifica se o valor atende ao comprimento máximo
+    }
+    if (validatableInput.min != null && typeof validatableInput.value === 'number') {
+        isValid = isValid && validatableInput.value >= validatableInput.min; //verifica se o valor é maior ou igual ao mínimo
+    }
+    if (validatableInput.max != null && typeof validatableInput.value === 'number') {
+        isValid = isValid && validatableInput.value <= validatableInput.max; //verifica se o valor é menor ou igual ao máximo
+    }
+
+    return isValid; //retorna o resultado da validação
+}
+
+
+
+
 //autobind decorator
 /**
  * Decorator criado para vincular o contexto de 'this' ao método,
@@ -5,7 +42,6 @@
  * Isso é útil quando o método é passado como callback,
  * como no caso do evento de submit do formulário.
  */
-
 function autobind(
     _: any,
     _2: string,
@@ -59,15 +95,58 @@ class ProjectInput{
         this.attach();
     }
 
-    //método para anexar o elemento ao template
+    //método para anexar e manipular elementos ao template
+
+
+    //metodo que sera validado os dados de entrada do usuário
+    //retorna uma tupla com os valores de entrada do usuário
+    private gatherUserInput(): [string, string, number] | void {
+        const enteredTitle = this.titleInputElement.value;
+        const enteredDescription = this.descriptionInputElement.value;
+        const enteredPeople = this.peopleInputElement.value;
+
+        //validar os dados de entrada usando a função validate
+        const titleValidatable: Validatable = {
+            value: enteredTitle,
+            required: true,
+            minLength: 5
+        };
+
+        const descriptionValidatable: Validatable = {
+            value: enteredDescription,
+            required: true,
+            minLength: 5
+        };
+
+        const peopleValidatable: Validatable = {
+            value: +enteredPeople, //converter para número
+            required: true,
+            min: 1,
+            max: 5
+        };
+
+        if (!validate(titleValidatable) || !validate(descriptionValidatable) ||!validate(peopleValidatable)) {
+            alert('Invalid input, please try again!'); //alerta se os dados de entrada não forem válidos
+            return; //retorna undefined se a validação falhar
+        }else {
+            //retorna uma tupla com os valores de entrada do usuário
+            return [enteredTitle, enteredDescription, +enteredPeople]; //converter para número
+        }
+
+
+    }
 
     //método para configurar o evento de submit
     @autobind //decorator para vincular o contexto de 'this' ao método
     private submitHandler(event: Event) {
         event.preventDefault(); //previne o comportamento padrão do formulário de recarregar a página
-        console.log(this.titleInputElement.value);
-        console.log(this.descriptionInputElement.value);
-        console.log(this.peopleInputElement.value);
+        const userInput = this.gatherUserInput(); //chama o método para obter os dados de entrada do usuário
+        if (Array.isArray(userInput)) {
+            const [title, description, people] = userInput;
+            console.log(title);
+            console.log(description);
+            console.log(people);
+        }
     }
     private configure() {
         this.element.addEventListener('submit', this.submitHandler);
