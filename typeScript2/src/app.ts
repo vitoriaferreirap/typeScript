@@ -1,12 +1,36 @@
+//autobind decorator
 /**
- * O código TypeScript (app.ts), depois de compilado para JavaScript (app.js),
- *  é responsável por pegar o conteúdo do template e inserir na página 
+ * Decorator criado para vincular o contexto de 'this' ao método,
+ * garantindo que o método seja chamado com o contexto correto.
+ * Isso é útil quando o método é passado como callback,
+ * como no caso do evento de submit do formulário.
  */
 
-//acessar formulario.html
+function autobind(
+    _: any,
+    _2: string,
+    descriptor: PropertyDescriptor
+) {
+    const originalMethod = descriptor.value;
+    const adjustedDescriptor: PropertyDescriptor = {
+        configurable: true,
+        get() {
+            const boundFn = originalMethod.bind(this);
+            return boundFn;
+        }
+    };
+    return adjustedDescriptor;
+}
+
+
+//ProjectInput Class
 class ProjectInput{
-    //Template é um elemento HTML que serve como modelo para criar novos elementos.
-    //acessar o template e o (host - local onde o template será inserido)
+    /**
+ * O código TypeScript (app.ts), depois de compilado para JavaScript (app.js),
+ * é responsável por pegar o conteúdo do template e inserir na página. TONANDO VISIVEL
+ * Template é um elemento HTML que serve como modelo para criar novos elementos.
+ * Acessar o template e o (host - local onde o template será inserido)
+ */
     templateElement: HTMLTemplateElement; 
     hostElement: HTMLDivElement;
     element: HTMLFormElement;
@@ -38,6 +62,7 @@ class ProjectInput{
     //método para anexar o elemento ao template
 
     //método para configurar o evento de submit
+    @autobind //decorator para vincular o contexto de 'this' ao método
     private submitHandler(event: Event) {
         event.preventDefault(); //previne o comportamento padrão do formulário de recarregar a página
         console.log(this.titleInputElement.value);
@@ -45,7 +70,7 @@ class ProjectInput{
         console.log(this.peopleInputElement.value);
     }
     private configure() {
-        this.element.addEventListener('submit', this.submitHandler.bind(this));//
+        this.element.addEventListener('submit', this.submitHandler);
     }
     private attach() {
         this.hostElement.insertAdjacentElement('afterbegin', this.element);
