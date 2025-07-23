@@ -58,6 +58,38 @@ function autobind(
     return adjustedDescriptor;
 }
 
+//ProjectList Class
+class ProjectList {
+    templateElement: HTMLTemplateElement;
+    hostElement: HTMLDivElement;
+    element: HTMLElement;
+
+    constructor(private type: 'active' | 'finished') {
+        this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
+        this.hostElement = document.getElementById('app')! as HTMLDivElement;
+
+        const importedNode = document.importNode(this.templateElement.content, true);
+        this.element = importedNode.firstElementChild as HTMLElement;
+        this.element.id = `${this.type}-projects`; //define o id do elemento com base no tipo (active ou finished)
+
+        this.attach();
+        this.renderContent(); 
+        
+    }
+
+    //método para renderizar o conteúdo do template de lista de projetos
+    private renderContent() {
+        const listId = `${this.type}-projects-list`;
+        this.element.querySelector('ul')!.id = listId; //define o id da lista dentro do elemento
+        this.element.querySelector('h2')!.textContent = this.type.toUpperCase()
+        + ' PROJECTS'; //define o texto do título com base no tipo (active ou finished)
+    }
+
+    private attach() {
+        this.hostElement.insertAdjacentElement('beforeend', this.element);
+    }
+}
+
 
 //ProjectInput Class
 class ProjectInput{
@@ -141,6 +173,8 @@ class ProjectInput{
     private submitHandler(event: Event) {
         event.preventDefault(); //previne o comportamento padrão do formulário de recarregar a página
         const userInput = this.gatherUserInput(); //chama o método para obter os dados de entrada do usuário
+        
+        // Tupla : tipo de array com quantidade fixa de elementos e tipos específicos
         if (Array.isArray(userInput)) {
             const [title, description, people] = userInput;
             console.log(title);
@@ -159,3 +193,5 @@ class ProjectInput{
 
 //instanciar a classe 
 const prjInput = new ProjectInput();
+const activeProjectList = new ProjectList('active'); //instanciar a lista de projetos ativos
+const finishedProjectList = new ProjectList('finished'); //instanciar a lista de projetos finalizados
