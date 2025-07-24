@@ -71,6 +71,16 @@ class ProjectState  extends State<Project> {
             listener(this.projects.slice()); //passa uma cópia da lista de projetos para o ouvinte
         }
     }
+
+    //deletar um projeto
+    deleteProject(projectId: string) {
+        this.projects = this.projects.filter(prj => prj.id !== projectId);
+        //percorrer todos os ouvintes e chamar a função de callback para notificar sobre a lista atualizada de projetos
+        for (const listener of this.listeners) {
+            listener(this.projects.slice()); //passa uma cópia da lista de projetos para o ouvinte
+        }
+    }
+
 }
 
 //instancia um obj de estado que sera usado para gerenciar os projetos
@@ -164,6 +174,36 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
     abstract renderContent(): void; 
 }
 
+//ProjectItem Class
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+    //propriedade para armazenar o projeto associado ao item
+    private project: Project;
+
+    constructor(hostId: string, project: Project) {
+        super('single-project', hostId, false, project.id); //chama o construtor da classe base Component
+        this.project = project;
+
+        this.configure();
+        this.renderContent();
+    }
+
+    configure() {
+        //adiciona ouvinte para o botão de excluir
+        const deleteBtn = this.element.querySelector('button:last-of-type')!;
+        deleteBtn.addEventListener('click', this.deleteProjectHandler.bind(this, this.project.id));
+    }
+
+    renderContent() {
+        this.element.querySelector('h2')!.textContent = this.project.title;
+        this.element.querySelector('h3')!.textContent = this.project.people.toString() + ' Pessoas Atribuídas';
+        this.element.querySelector('p')!.textContent = this.project.description;
+    }
+
+    private deleteProjectHandler(projectId: string) {
+        projectState.deleteProject(projectId);
+    }
+}
+
 //ProjectList Class
 class ProjectList extends Component<HTMLDivElement, HTMLElement> {
 
@@ -209,9 +249,7 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
         const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
         listEl.innerHTML = ''; //limpa a lista antes de renderizar os projetos
         for (const prjItem of this.assignedProjects) {
-            const listItem = document.createElement('li'); //cria um novo item de lista
-            listItem.textContent = prjItem.title; //define o texto do item de lista como o título do projeto
-            listEl.appendChild(listItem); //adiciona o item de lista à lista
+           new ProjectItem(listEl.id, prjItem); //cria um novo item de projeto para cada projeto atribuído
         }
     }
 }
