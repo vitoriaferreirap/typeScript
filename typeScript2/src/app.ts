@@ -1,3 +1,16 @@
+//Drag  & Drop Interfaces - arrastar e soltar
+interface Draggable {
+    dragStartHandler(event: DragEvent): void; //método para iniciar o arrasto
+    dragEndHandler(event: DragEvent): void; //método para finalizar o arrasto
+}
+interface DragTarget {
+    dragOverHandler(event: DragEvent): void; //método para lidar com o evento de arrastar sobre o alvo
+    dropHandler(event: DragEvent): void; //método para lidar com o evento de soltar no alvo
+    dragLeaveHandler(event: DragEvent): void; //método para lidar com o evento de sair do alvo
+}
+
+
+
 //Project Type
 enum ProjectStatus {
     Active,
@@ -66,6 +79,21 @@ class ProjectState  extends State<Project> {
         );
     
         this.projects.push(newProject); //adiciona o novo projeto ao array de projetos
+        this.updateListeners(); //chama o método para atualizar os ouvintes com a lista atualizada de projetos
+    }
+
+    //método para mover um projeto de status (active ou finished)
+    //recebe o id do projeto e o novo status
+    moveProject(projectId: string, newStatus: ProjectStatus) {
+        const project = this.projects.find(prj => prj.id === projectId); //encontra o projeto pelo id
+        if (project && project.status !== newStatus) { //verifica se o projeto existe e se o status é diferente do novo status
+            project.status = newStatus; //atualiza o status do projeto
+            this.updateListeners(); //chama o método para atualizar os ouvintes com a lista atualizada de projetos  
+        }
+        
+    }
+
+    private updateListeners() {
         //percorrer todos os ouvintes e chamar a função de callback para notificar sobre o novo projeto
         for (const listener of this.listeners) {
             listener(this.projects.slice()); //passa uma cópia da lista de projetos para o ouvinte
@@ -175,7 +203,7 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
 }
 
 //ProjectItem Class
-class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> implements Draggable {
     //propriedade para armazenar o projeto associado ao item
     private project: Project;
 
@@ -196,8 +224,24 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
         this.configure();
         this.renderContent();
     }
+    @autobind
+    dragStartHandler(event: DragEvent): void {
+         event.dataTransfer!.setData('text/plain', this.project.id);//define o id do projeto arrastado como dado transferido
+        event.dataTransfer!.effectAllowed = 'move'; //define o efeito permitido para o arrasto
+    }
+    dragEndHandler(_: DragEvent): void {
+        
+    }
 
     configure() {
+        //adiciona ouvintes de eventos para arrastar e soltar
+        this.element.addEventListener('dragstart', (event: DragEvent) => {
+            this.dragStartHandler(event);
+        });
+        this.element.addEventListener('dragend', (event: DragEvent) => {
+            this.dragEndHandler(event);
+        });
+
         //adiciona ouvinte para o botão de excluir
         const deleteBtn = this.element.querySelector('button:last-of-type')!;
         deleteBtn.addEventListener('click', this.deleteProjectHandler.bind(this, this.project.id));
@@ -215,7 +259,7 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
 }
 
 //ProjectList Class
-class ProjectList extends Component<HTMLDivElement, HTMLElement> {
+class ProjectList extends Component<HTMLDivElement, HTMLElement> implements DragTarget {
 
     assignedProjects: Project[]; //array para armazenar os projetos atribuídos à lista (active ou finished)
 
@@ -230,10 +274,38 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement> {
         this.renderContent(); 
         
     }
+    //método para lidar com o evento de arrastar sobre o alvo
+    @autobind //decorator para vincular o contexto de 'this' ao método
+    dragOverHandler(event: DragEvent): void {
+        if (event.dataTransfer && event.dataTransfer.types[0] === 'text/plain') {
+            event.preventDefault(); //previne o comportamento padrão do navegador ao arrastar sobre o alvo
+            const listEl = this.element.querySelector('ul')!; //seleciona a lista dentro do elemento
+            listEl.classList.add('droppable'); //adiciona a classe 'droppable' para indicar que o alvo está pronto para receber o item arrastado
+        }
+    }
+    //método para lidar com o evento de soltar no alvo
+    dropHandler(event: DragEvent): void {
+        const prjId = event.dataTransfer!.getData('text/plain'); //exibe o id do projeto arrastado no console
+        projectState.moveProject(prjId, this.type === 'active' ? ProjectStatus.Active : ProjectStatus.Finished); //move o projeto para o novo status (active ou finished)
+       
+    }
 
-       //método para configurar o componente (Usado para resolver problemas de contexto)
+    // método para lidar com o evento de sair do alvo
+    @autobind
+    dragLeaveHandler(_: DragEvent): void {
+        const listEl = this.element.querySelector('ul')!; //seleciona a lista dentro do elemento
+        listEl.classList.remove('droppable'); //remove a classe 'droppable' para indicar que o alvo não está mais pronto para receber o item arrastado
+     }
+
+    //método para configurar o componente (Usado para resolver problemas de contexto)
     configure() {
-         //ADD OUVINTE ao estado do projeto para atualizar a lista quando um novo projeto for adicionado
+
+        this.element.addEventListener('dragover', this.dragOverHandler); //adiciona ouvinte para o evento de arrastar sobre o alvo
+        this.element.addEventListener('dragleave', this.dragLeaveHandler); //adiciona ouvinte para o evento de sair do alvo
+        this.element.addEventListener('drop', this.dropHandler); //adiciona ouvinte para o evento de soltar no alvo
+        
+
+        //ADD OUVINTE ao estado do projeto para atualizar a lista quando um novo projeto for adicionado
         projectState.addListener((projects: Project[]) => {
             const relevantProjects = projects.filter(prj => {
                 if(this.type === 'active') {
