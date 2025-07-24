@@ -179,6 +179,16 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
     //propriedade para armazenar o projeto associado ao item
     private project: Project;
 
+    //getters e setters são usados para acessar e modificar propriedades de forma controlada
+    get persons() {
+        if(this.project.people === 1) {
+            return '1 Pessoa'; //se houver apenas uma pessoa, retorna no singular
+        }else {
+            return `${this.project.people} Pessoas`; //caso contrário, retorna no plural
+        }
+    }
+
+
     constructor(hostId: string, project: Project) {
         super('single-project', hostId, false, project.id); //chama o construtor da classe base Component
         this.project = project;
@@ -195,7 +205,7 @@ class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
 
     renderContent() {
         this.element.querySelector('h2')!.textContent = this.project.title;
-        this.element.querySelector('h3')!.textContent = this.project.people.toString() + ' Pessoas Atribuídas';
+        this.element.querySelector('h3')!.textContent = this.persons + ' Atribuída'; //chama o getter people para obter o texto correto
         this.element.querySelector('p')!.textContent = this.project.description;
     }
 
