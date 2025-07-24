@@ -42,7 +42,17 @@ class ProjectState {
 
     //projeto inicia ativo
     addProject(title: string, description: string, numOfPeople: number) {
-        const newProject =  new Project(
+         // Verifica se já existe um projeto com o mesmo título e descrição
+        const exists = this.projects.some(
+        prj => prj.title === title && prj.description === description
+    );
+        if (exists) {
+            alert('Já existe um projeto com esse título e descrição!');
+        return;
+    }
+
+        
+        const newProject = new Project(
             Math.random().toString(), //random = gera um id aleatório para o projeto
             title,
             description,
@@ -123,6 +133,9 @@ function autobind(
     return adjustedDescriptor;
 }
 
+
+
+
 //ProjectList Class
 class ProjectList {
     templateElement: HTMLTemplateElement;
@@ -142,7 +155,13 @@ class ProjectList {
 
         //adiciona um ouvinte ao estado do projeto para atualizar a lista quando um novo projeto for adicionado
         projectState.addListener((projects: Project[]) => {
-            this.assignedProjects = projects;
+            const relevantProjects = projects.filter(prj => {
+                if(this.type === 'active') {
+                    return prj.status === ProjectStatus.Active; //filtra os projetos ativos
+                }                       
+                return prj.status === ProjectStatus.Finished; //filtra os projetos finalizados
+            });
+            this.assignedProjects = relevantProjects;
             this.renderProjects(); //chama o método para renderizar os projetos atribuídos
         });
 
@@ -155,7 +174,6 @@ class ProjectList {
     private renderProjects() {
         const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
         listEl.innerHTML = ''; //limpa a lista antes de renderizar os projetos
-
         for (const prjItem of this.assignedProjects) {
             const listItem = document.createElement('li'); //cria um novo item de lista
             listItem.textContent = prjItem.title; //define o texto do item de lista como o título do projeto
