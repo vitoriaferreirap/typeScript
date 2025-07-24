@@ -1,3 +1,44 @@
+//Project state management
+class ProjectState {
+    private listeners:any[] = []; //array para armazenar os ouvintes que serão notificados quando um novo projeto for adicionado
+    private projects: any[] = []; //array para armazenar os projetos
+    private static instance: ProjectState; //variável para armazenar a instância única da classe
+
+    private constructor() {}
+
+    //método para obter a instância única da classe
+    static getInstance() {
+        if (this.instance) {
+            return this.instance; //retorna a instância existente se já foi criada
+        }
+        this.instance = new ProjectState(); //cria uma nova instância se não existir (nova lista de projetos)
+        return this.instance;
+    }
+
+    addListener(listenerFn: Function) {
+        this.listeners.push(listenerFn); //adiciona o ouvinte ao array de ouvintes
+    }
+
+    addProject(title: string, description: string, numOfPeople: number) {
+        const newProject = {
+            id: Math.random().toString(), //random = gera um id aleatório para o projeto
+            title: title,
+            description: description,
+            people: numOfPeople
+        };
+        this.projects.push(newProject); //adiciona o novo projeto ao array de projetos
+        //percorrer todos os ouvintes e chamar a função de callback para notificar sobre o novo projeto
+        for (const listener of this.listeners) {
+            listener(this.projects.slice()); //passa uma cópia da lista de projetos para o ouvinte
+        }
+    }
+}
+
+//instancia um obj de estado que sera usado para gerenciar os projetos
+const projectState = ProjectState.getInstance();
+
+
+
 //Validation usando interfaces
 //A interface Validatable define as regras de validação que podem ser aplicadas a diferentes tipos de dados.
 //Ela pode ser usada para validar strings, números ou outros tipos de dados que atendam aos critérios especificados.
@@ -63,18 +104,39 @@ class ProjectList {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
     element: HTMLElement;
+    assignedProjects: any[]; //array para armazenar os projetos atribuídos à lista (active ou finished)
 
     constructor(private type: 'active' | 'finished') {
         this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
         this.hostElement = document.getElementById('app')! as HTMLDivElement;
+        
+        this.assignedProjects = []; //inicializa o array de projetos atribuídos
 
         const importedNode = document.importNode(this.templateElement.content, true);
         this.element = importedNode.firstElementChild as HTMLElement;
         this.element.id = `${this.type}-projects`; //define o id do elemento com base no tipo (active ou finished)
 
+        //adiciona um ouvinte ao estado do projeto para atualizar a lista quando um novo projeto for adicionado
+        projectState.addListener((projects: any[]) => {
+            this.assignedProjects = projects;
+            this.renderProjects(); //chama o método para renderizar os projetos atribuídos
+        });
+
         this.attach();
         this.renderContent(); 
         
+    }
+
+    //método para renderizar a lista de projetos atribuídos
+    private renderProjects() {
+        const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+        listEl.innerHTML = ''; //limpa a lista antes de renderizar os projetos
+
+        for (const prjItem of this.assignedProjects) {
+            const listItem = document.createElement('li'); //cria um novo item de lista
+            listItem.textContent = prjItem.title; //define o texto do item de lista como o título do projeto
+            listEl.appendChild(listItem); //adiciona o item de lista à lista
+        }
     }
 
     //método para renderizar o conteúdo do template de lista de projetos
@@ -127,7 +189,7 @@ class ProjectInput{
         this.attach();
     }
 
-    //método para anexar e manipular elementos ao template
+    //métodos para anexar e manipular elementos ao template
 
 
     //metodo que sera validado os dados de entrada do usuário
@@ -177,9 +239,8 @@ class ProjectInput{
         // Tupla : tipo de array com quantidade fixa de elementos e tipos específicos
         if (Array.isArray(userInput)) {
             const [title, description, people] = userInput;
-            console.log(title);
-            console.log(description);
-            console.log(people);
+            projectState.addProject(title, description, people); //adiciona o projeto ao estado global
+            //this.clearInputs(); //limpa os campos de entrada após a validação bem-sucedida
         }
     }
     private configure() {
@@ -191,7 +252,7 @@ class ProjectInput{
 
 }
 
-//instanciar a classe 
+//instanciando um novo objeto em cima da classe
 const prjInput = new ProjectInput();
 const activeProjectList = new ProjectList('active'); //instanciar a lista de projetos ativos
 const finishedProjectList = new ProjectList('finished'); //instanciar a lista de projetos finalizados
