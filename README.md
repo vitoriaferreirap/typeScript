@@ -14,7 +14,7 @@ Este repositório reúne meus estudos, atividades e projetos desenvolvidos duran
 - Node.js (para gerenciamento do projeto)
 - Lite-server (para rodar os projetos front-end)
 
-## 💡 Como executar os projetos
+## Como executar os projetos
 
 1. Clone o repositório:
    ```
