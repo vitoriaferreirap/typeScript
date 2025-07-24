@@ -83,7 +83,7 @@ class ProjectState  extends State<Project> {
     }
 
     //método para mover um projeto de status (active ou finished)
-    //recebe o id do projeto e o novo status
+    //recebe o id do projeto e o novo status    git push
     moveProject(projectId: string, newStatus: ProjectStatus) {
         const project = this.projects.find(prj => prj.id === projectId); //encontra o projeto pelo id
         if (project && project.status !== newStatus) { //verifica se o projeto existe e se o status é diferente do novo status
