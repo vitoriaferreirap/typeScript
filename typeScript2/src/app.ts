@@ -1,7 +1,28 @@
+//Project Type
+enum ProjectStatus {
+    Active,
+    Finished
+}
+
+
+class Project {
+    constructor(
+        public id: string,
+        public title: string,
+        public description: string,
+        public people: number,
+        public status: ProjectStatus
+    ) {}
+}
+
 //Project state management
+
+//listener personalizado
+type Listener = (items: Project[]) => void;
+
 class ProjectState {
-    private listeners:any[] = []; //array para armazenar os ouvintes que serão notificados quando um novo projeto for adicionado
-    private projects: any[] = []; //array para armazenar os projetos
+    private listeners:Listener[] = []; //array para armazenar os ouvintes que serão notificados quando um novo projeto for adicionado
+    private projects: Project[] = []; //array para armazenar os projetos
     private static instance: ProjectState; //variável para armazenar a instância única da classe
 
     private constructor() {}
@@ -15,17 +36,20 @@ class ProjectState {
         return this.instance;
     }
 
-    addListener(listenerFn: Function) {
+    addListener(listenerFn: Listener) {
         this.listeners.push(listenerFn); //adiciona o ouvinte ao array de ouvintes
     }
 
+    //projeto inicia ativo
     addProject(title: string, description: string, numOfPeople: number) {
-        const newProject = {
-            id: Math.random().toString(), //random = gera um id aleatório para o projeto
-            title: title,
-            description: description,
-            people: numOfPeople
-        };
+        const newProject =  new Project(
+            Math.random().toString(), //random = gera um id aleatório para o projeto
+            title,
+            description,
+            numOfPeople,
+            ProjectStatus.Active //status do projeto inicia como ativo
+        );
+    
         this.projects.push(newProject); //adiciona o novo projeto ao array de projetos
         //percorrer todos os ouvintes e chamar a função de callback para notificar sobre o novo projeto
         for (const listener of this.listeners) {
@@ -104,12 +128,12 @@ class ProjectList {
     templateElement: HTMLTemplateElement;
     hostElement: HTMLDivElement;
     element: HTMLElement;
-    assignedProjects: any[]; //array para armazenar os projetos atribuídos à lista (active ou finished)
+    assignedProjects: Project[]; //array para armazenar os projetos atribuídos à lista (active ou finished)
 
     constructor(private type: 'active' | 'finished') {
         this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
         this.hostElement = document.getElementById('app')! as HTMLDivElement;
-        
+
         this.assignedProjects = []; //inicializa o array de projetos atribuídos
 
         const importedNode = document.importNode(this.templateElement.content, true);
@@ -117,7 +141,7 @@ class ProjectList {
         this.element.id = `${this.type}-projects`; //define o id do elemento com base no tipo (active ou finished)
 
         //adiciona um ouvinte ao estado do projeto para atualizar a lista quando um novo projeto for adicionado
-        projectState.addListener((projects: any[]) => {
+        projectState.addListener((projects: Project[]) => {
             this.assignedProjects = projects;
             this.renderProjects(); //chama o método para renderizar os projetos atribuídos
         });
