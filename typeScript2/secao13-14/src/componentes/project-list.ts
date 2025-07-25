@@ -5,20 +5,18 @@ import { projectState } from '../state/project-state.js';
 import Cpm from './base-components.js';
 import { ProjectItem } from './project-item.js';
 
-type ProjectListType = 'active' | 'finished';
-    //ProjectList Class
-export class ProjectList extends Cpm<HTMLDivElement, HTMLElement> implements DragTarget {
-    type: ProjectListType;
-    assignedProjects: Project[];
 
-    constructor(type: ProjectListType) {
-         console.log('Criando ProjectList do tipo:', type);
-        super('project-list', 'app', false, `${type}-projects`);
-        this.type = type;
-        this.assignedProjects = [];
-        this.configure();
-        this.renderContent();
-    }
+//ProjectList Class
+export class ProjectList extends Cpm<HTMLDivElement, HTMLElement> implements DragTarget {
+   assignedProjects: Project[];
+
+  constructor(private type: 'active' | 'finished') {
+    super('project-list', 'app', false, `${type}-projects`);
+    this.assignedProjects = [];
+
+    this.configure();
+    this.renderContent();
+  }
     //método para lidar com o evento de arrastar sobre o alvo
     @autobind //decorator para vincular o contexto de 'this' ao método
     dragOverHandler(event: DragEvent): void {
@@ -29,15 +27,16 @@ export class ProjectList extends Cpm<HTMLDivElement, HTMLElement> implements Dra
         }
     }
     //método para lidar com o evento de soltar no alvo
-   dropHandler(event: DragEvent) {
-    event.preventDefault();
-    const prjId = event.dataTransfer!.getData('text/plain');
-    projectState.moveProject(
-    prjId,
-    this.type === 'active' ? ProjectStatus.Active : ProjectStatus.Finished
-    );
-}
-
+    @autobind //decorator para vincular o contexto de 'this' ao método
+    dropHandler(event: DragEvent) {
+        event.preventDefault();
+        const prjId = event.dataTransfer!.getData('text/plain');
+        projectState.moveProject(
+            prjId,
+            this.type === 'active' ? ProjectStatus.Active : ProjectStatus.Finished
+        );
+    }
+    
     // método para lidar com o evento de sair do alvo
     @autobind
     dragLeaveHandler(_: DragEvent): void {
