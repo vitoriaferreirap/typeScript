@@ -1,9 +1,11 @@
 import axios from 'axios';
+
 //acessando forms
 const form = document.querySelector('form')!;
 const addressInput = document.getElementById('address')! as HTMLInputElement; // não sabe que tipo de elemento é
 
-const GOOGLE_API_KEY = 'AIzaSyCBIOXGzkHgk02n3rP3Hpn-nparsp28VgY'; 
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+console.log('API KEY:', process.env.GOOGLE_API_KEY);
 
 declare var google: any; // Declaração para o objeto global google
 
